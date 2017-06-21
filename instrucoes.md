@@ -148,7 +148,9 @@ Outros comandos interessantes: `docker container ls`, `docker start` e `docker s
 
 Copiar arquivos do host para a image é feito usando o comando `COPY`:
 
-> COPY . /app
+```
+COPY . /app
+```
 
 Devemos recriar a image `make buildImage` e então podemos verificar se o código está por lá `docker container run javakihon ls /app`
 
