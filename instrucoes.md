@@ -108,7 +108,8 @@ Novamente, `docker image build .`
 Depender de `latest` não é uma boa prática, vamos mudar para 16.04 (versão com suporte):
 
 ```
-FROM ubuntu:16.04```
+FROM ubuntu:16.04
+```
 
 ## Dando nome a nossa imagem
 
