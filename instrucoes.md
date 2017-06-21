@@ -20,8 +20,8 @@ Pull da imagem padrão `docker image pull postgres`. Executar container `docker 
 
 Se listarmos os containers `docker container ls`
 
-| CONTAINER | ID | IMAGE | COMMAND | CREATED | STATUS | PORTS | NAMES |
-|-----------|----|-------|---------|---------|--------|-------|-------|
+| CONTAINER ID | IMAGE | COMMAND | CREATED | STATUS | PORTS | NAMES |
+|--------------|-------|---------|---------|--------|-------|-------|
 | 6740b6c4f3ba | postgres | "docker-entrypoint..." | 59 seconds ago | Up 57 seconds | 5432/tcp | awesome_euclid |
 
 Agora podemos executar novamente a aplicação `make run`, mas mesmo assim ela não deve conseguir conectar ao banco. Por que?
@@ -42,8 +42,8 @@ Assim, podemos exeutar `docker container run -p 5432:5432 postgres`.
 
 O container em execução agora tem a porta mapeada para o host `docker container ls`
 
-| CONTAINER | ID | IMAGE | COMMAND | CREATED | STATUS | PORTS | NAMES |
-|-----------|----|-------|---------|---------|--------|-------|-------|
+| CONTAINER ID | IMAGE | COMMAND | CREATED | STATUS | PORTS | NAMES |
+|--------------|-------|---------|---------|--------|-------|-------|
 | d4bd5134b4ba | postgres | "docker-entrypoint..." | 59 seconds ago | Up 57 seconds | 0.0.0.0:5432->5432/tcp | angry_darwin |
 
 `docker container port d4bd5134b4ba`
