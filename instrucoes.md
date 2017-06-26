@@ -158,6 +158,14 @@ Devemos recriar a image `make buildImage` e então podemos verificar se o códig
 
 Já com o código e as dependências instaladas, podemos executar os testes a partir do container: `docker container run -ti javakihon bash -c "cd app && make test"`.
 
+## Opcional: Reusando o gradle
+
+Sempre que executamos os testes ou a aplicação, o gradlew irá baixar a versão correta do gradle. Isso é longe de ideal para o tempo do workshop.
+
+Pensando nisso, criamos uma imagem com o gradle instalado por padrão, [javakihon-gradle](https://hub.docker.com/r/fernandoalves/javakihon-gradle/).
+
+**Importante:** Essa imagem deve ser utilizada somente como parte desse workshop. Não é uma solução definitiva e nem recomendada para uma situação real.
+
 ## Quais outros serviços ela precisa?
 
 Em execução, o aplicação precisa do banco de dados. Nesse caso temos 2 opções:
