@@ -17,6 +17,8 @@ function ensure_image_is_present {
   if ! image_downloaded $1 ; then
     echo "Pulling image $1"
     pull_image $1
+  else
+    echo "Found image $1!"
   fi
 }
 
@@ -48,10 +50,19 @@ function install_docker {
 }
 
 function pull_images {
+  ensure_image_is_present 'fernandoalves/javakihon-gradle:latest'
   ensure_image_is_present 'ubuntu:latest'
-  ensure_image_is_present 'ubuntu:16.04'
-  ensure_image_is_present 'postgres:latest'
+}
+
+function postgres_notice {
+  if check_presence 'psql' ; then
+    echo 'It looks like you have postgres installed.'
+    echo 'Please make sure the server is not running before the workshop.'
+  fi
 }
 
 install_docker
 pull_images
+postgres_notice
+
+echo "All set!"
