@@ -154,9 +154,17 @@ COPY . /app
 
 Devemos recriar a image `make buildImage` e então podemos verificar se o código está por lá `docker container run javakihon ls /app`
 
+## Diretório padrão
+
+Para que todos os comandos do `run` executem a partir do diretório /app, podemos usar:
+
+```
+WORKDIR /app
+```
+
 ## Executando testes a partir do container
 
-Já com o código e as dependências instaladas, podemos executar os testes a partir do container: `docker container run -ti javakihon bash -c "cd app && make test"`.
+Já com o código e as dependências instaladas, podemos executar os testes a partir do container: `docker container run -ti javakihon make test`.
 
 ## Opcional: Reusando o gradle
 
