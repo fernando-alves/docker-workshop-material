@@ -293,4 +293,36 @@ Agora podemos usar `docker-compose up` e `docker-compose down` para iniciar e pa
 
 ## Ciclo de desenvolvimento - Volumes
 
+Nesse ponto, ainda é necessário criar uma nova imagem a cada vez que mudamos o código. Idealmente, para desenvolvimento, queremos que esteja sincronizado com as mudanças no host. Podemos fazer isso usando volumes.
+
+Primeiro temos que indicar, na imagem, que "montaremos" um volume em `/app`:
+
+```
+VOLUME /app
+```
+
+Ao executar o container, montamos o diretório atual nesse volume:
+
+```
+app:
+  image: javakihon
+  build: .
+  ports:
+    - 8080:8080
+  environment:
+    - DB_HOST=db
+  depends_on:
+    - db
+  volumes:
+    - .:/app
+```
+
+Com o código sincronizado, executamos `docker-compose run --rm app bash` e então rodamos os testes de dentro do container.
+
 ## Não rodar como root
+
+TBD
+
+## dockerignore
+
+TBD
