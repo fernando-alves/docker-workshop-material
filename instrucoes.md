@@ -238,18 +238,12 @@ spring:
 
 ```
 
-## Executando a aplicação no container
+## Indicando o host do banco de dados
 
-Agora podemos indicar qual o endereço do banco de dados na própria image:
-
-```
-ENV DB_HOST db
-```
-
-Também podemos adicinar um comando padrão para executá-la:
+Agora podemos indicar qual o endereço do banco de dados usando a opção `-e` do comando `run`:
 
 ```
-CMD cd /app && make run
+docker container run -e DB_HOST=db --network=javakihon javakihon
 ```
 
 ## Acessando de dentro do container
@@ -266,7 +260,7 @@ Devemos indicar, no momemnto de criação da image, que o container deve aceitar
 EXPOSE 8080  
 ```
 
-Como o postgres, nosso comando run também deve mapear a porta: `docker container run --network=javakihon -p 8080:8080 javakihon`
+Como o postgres, nosso comando run também deve mapear a porta: `docker container run -e DB_HOST=db --network=javakihon -p 8080:8080 javakihon`
 
 ## Simplificando o gerenciamento com docker-compose
 
