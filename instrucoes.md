@@ -289,7 +289,7 @@ services:
     image: postgres
 ```
 
-Agora podemos usar `docker-compose up` e `docker-compose down` para iniciar e parar os containers.
+Agora podemos usar `docker-compose up` e `docker-compose down` para iniciar e parar os containers. O docker-compose também pode ser utilizado para criar as imagens: `docker-compose build`
 
 ## Ciclo de desenvolvimento - Volumes
 
