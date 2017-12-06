@@ -65,6 +65,7 @@ function make_notice {
   if ! check_presence 'make' ; then
     echo 'It looks like you dont have make installed'
     echo 'You may need to install xcode developer tools. It can be done by running: xcode-select --install'
+  fi
 }
 
 install_docker
