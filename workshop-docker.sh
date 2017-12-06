@@ -61,8 +61,15 @@ function postgres_notice {
   fi
 }
 
+function make_notice {
+  if ! check_presence 'make' ; then
+    echo 'It looks like you dont have make installed'
+    echo 'You may need to install xcode developer tools. It can be done by running: xcode-select --install'
+}
+
 install_docker
 pull_images
 postgres_notice
+make_notice
 
-echo "All set!"
+echo 'All set!'
