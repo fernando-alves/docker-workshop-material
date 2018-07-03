@@ -235,19 +235,26 @@ Do [12factor](https://12factor.net/pt_br/config), temos:
 
 > Aplicações as vezes armazenam as configurações no código como constantes. Isto é uma violação do doze-fatores, o que exige uma estrita separação da configuração a partir do código. Configuração varia substancialmente entre deploys, código não.
 
-Vamos mudar o application.yml para tornar o host do banco configurável:
+Vamos mudar o `config/index.js` para tornar o host do banco configurável:
 
 ```
-spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_HOST:localhost}/postgres
-    username: postgres
-  jpa:
-    hibernate:
-      dialect: org.hibernate.dialect.PostgresSQLDialect
-      ddl-auto: create-drop
+'use strict';
 
+module.exports = {
+  web: {
+    port: 8080
+  },
+  preseed: {
+    fernando: [
+      'bulbassaur',
+      'articuno'
+    ]
+  },
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: 6379
+  }
+}
 ```
 
 ## Indicando o host do banco de dados
@@ -255,7 +262,7 @@ spring:
 Agora podemos indicar qual o endereço do banco de dados usando a opção `-e` do comando `run`:
 
 ```
-docker container run -e DB_HOST=db --network=javakihon javakihon
+docker container run -e REDIS_HOST=db --network=pokenode-network pokenode
 ```
 
 ## Acessando de dentro do container
@@ -272,7 +279,7 @@ Devemos indicar, no momemnto de criação da image, que o container deve aceitar
 EXPOSE 8080
 ```
 
-Como o postgres, nosso comando run também deve mapear a porta: `docker container run -e DB_HOST=db --network=javakihon -p 8080:8080 javakihon`
+Como o postgres, nosso comando run também deve mapear a porta: `docker container run -e REDIS_HOST=db --network=pokenode-network -p 8080:8080 pokenode`
 
 ## Simplificando o gerenciamento com docker-compose
 
@@ -285,23 +292,22 @@ Tudo isso pode ser simplificado usando o `docker-compose`.
 Todo o gerenciamento de containers pode ser traduzido em um arquivo do docker-compose semelhante a esse:
 
 ```
-version: '3'
-
+version: '3.6'
 services:
   app:
-    image: javakihon
     build: .
+    image: pokenode
     ports:
       - 8080:8080
-    environment:
-      - DB_HOST=db
     depends_on:
-      - db
-  db:
-    image: postgres
+      - redis
+    environment:
+      - REDIS_HOST=redis
+  redis:
+    image: redis:latest
 ```
 
-Agora podemos usar `docker-compose up` e `docker-compose down` para iniciar e parar os containers. O docker-compose também pode ser utilizado para criar as imagens: `docker-compose build`
+Agora podemos usar `docker-compose up` e `docker-compose down` para iniciar e parar os containers.
 
 ## Ciclo de desenvolvimento - Volumes
 
@@ -322,7 +328,7 @@ app:
   ports:
     - 8080:8080
   environment:
-    - DB_HOST=db
+    - REDIS_HOST=db
   depends_on:
     - db
   volumes:
