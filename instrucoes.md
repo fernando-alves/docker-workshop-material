@@ -181,6 +181,10 @@ WORKDIR /app
 
 Antes de qualquer coisa precisamos instalar as dependências, para isso, excutamos `npm install` e recriamos a image.
 
+```
+RUN npm install
+```
+
 Por padrão, `npm` instala as dependências no diretório `node_modules` na raiz do projeto. Quando copiamos os arquivos, esse diretório também é incluso.
 
 Isso pode acarretar em problemas, dado que o ambiente do host é diferente do container. Podemos indicar ao Docker que ignore o diretório usando o arquivo `.dockerignore`.
