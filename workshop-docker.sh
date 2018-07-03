@@ -44,33 +44,24 @@ function install_if_not_present {
   fi
 }
 
-function install_docker {
+function setup_docker {
   ensure_brew_is_installed
   install_if_not_present docker
 }
 
 function pull_images {
-  ensure_image_is_present 'fernandoalves/javakihon-gradle:latest'
-  ensure_image_is_present 'ubuntu:latest'
+  ensure_image_is_present 'ubuntu:18.04'
 }
 
-function postgres_notice {
-  if check_presence 'psql' ; then
-    echo 'It looks like you have postgres installed.'
+function redis_notice {
+  if check_presence 'redis-cli' ; then
+    echo 'It looks like you have redis installed.'
     echo 'Please make sure the server is not running before the workshop.'
   fi
 }
 
-function make_notice {
-  if ! check_presence 'make' ; then
-    echo 'It looks like you dont have make installed'
-    echo 'You may need to install xcode developer tools. It can be done by running: xcode-select --install'
-  fi
-}
-
-install_docker
+setup_docker
 pull_images
-postgres_notice
-make_notice
+redis_notice
 
 echo 'All set!'
