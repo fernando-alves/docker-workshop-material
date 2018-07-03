@@ -1,34 +1,34 @@
 ## Clonar repositório
 
-`git clone git@github.com:ronualdo/javakihon.git`
+`https://github.com/fernando-alves/pokenode`
 
 ## Rodar testes
 
-No diretório raiz, executar `make test`.
+No diretório raiz, executar `npm install` e depois `npm test`. As instruções estão no README do projeto.
 
 ## Executar aplicação
 
-No diretório raiz, executar `make run`.
+No diretório raiz, executar `npm start`.
 
-> org.postgresql.util.PSQLException: Connection refused. Check that the hostname and port are correct and that the postmaster is accepting
+> Error: Redis connection to localhost:6379 failed - connect ECONNREFUSED 127.0.0.1:6379
 
 App não conseguiu achar o banco de dados, precisamos de um.
 
-## Executando postgres a partir de container
+## Executando o Redis a partir de container
 
-Pull da imagem padrão `docker image pull postgres`. Executar container `docker container run postgres`.
+Pull da imagem padrão `docker image pull redis`. Executar container `docker container run redis`.
 
 Se listarmos os containers `docker container ls`
 
 | CONTAINER ID | IMAGE | COMMAND | CREATED | STATUS | PORTS | NAMES |
 |--------------|-------|---------|---------|--------|-------|-------|
-| 6740b6c4f3ba | postgres | "docker-entrypoint..." | 59 seconds ago | Up 57 seconds | 5432/tcp | awesome_euclid |
+| 6740b6c4f3ba | redis | "docker-entrypoint..." | 59 seconds ago | Up 57 seconds | 6379/tcp | awesome_euclid |
 
-Agora podemos executar novamente a aplicação `make run`, mas mesmo assim ela não deve conseguir conectar ao banco. Por que?
+Agora podemos executar novamente a aplicação `npm start`, mas mesmo assim ela não deve conseguir conectar ao banco. Por que?
 
 ## Portas
 
-O ports do container mostra 5432/tcp, mas ela não deve estar mapeada para nenhuma no host.
+O ports do container mostra 6379/tcp, mas ela não deve estar mapeada para nenhuma no host.
 
 Executar `docker container port 6740b6c4f3ba` deve retornar uma lista vazia.
 
@@ -38,30 +38,30 @@ Como mapear as portas? 2 opções no docker container run:
 - -p \<container-port\>:
 \<host-port\>: mapeia as portas específicas
 
-Assim, podemos exeutar `docker container run -p 5432:5432 postgres`.
+Assim, podemos exeutar `docker container run -p 6379:6379 redis`.
 
 O container em execução agora tem a porta mapeada para o host `docker container ls`
 
 | CONTAINER ID | IMAGE | COMMAND | CREATED | STATUS | PORTS | NAMES |
 |--------------|-------|---------|---------|--------|-------|-------|
-| d4bd5134b4ba | postgres | "docker-entrypoint..." | 59 seconds ago | Up 57 seconds | 0.0.0.0:5432->5432/tcp | angry_darwin |
+| d4bd5134b4ba | postgres | "docker-entrypoint..." | 59 seconds ago | Up 57 seconds | 0.0.0.0:6379->6379/tcp | angry_darwin |
 
 `docker container port d4bd5134b4ba`
 
-> 5432/tcp -> 0.0.0.0:5432
+> 0.0.0.0:6379->6379/tcp
 
-Finalmente podemos executar `make run` e visitar http://localhost:8080/
+Finalmente podemos executar `npm start` e visitar http://localhost:8080/
 
 ## Executando em segundo plano
 
-O comando `docker container run -p 5432:5432 -d postgres` executará o container em segundo plano.
+O comando `docker container run -p 6379:6379 -d redis` executará o container em segundo plano.
 
 ## Movendo a aplicação para um container
 
 Do que nossa aplicação precisa pra executar?
 
-- Java
-- make para executar os comandos
+- Node
+- curl para instalar o node
 - Código fonte!
 
 A partir de uma máquina nova (assumindo ubuntu), como instalar essas dependências?
@@ -78,24 +78,24 @@ FROM ubuntu:latest
 
 Para criar a imagem, usamos o comando `docker image build .`
 
-> Sending build context to Docker daemon  1.19 MB  
-Step 1/1 : FROM ubuntu:latest  
-latest: Pulling from library/ubuntu  
-75c416ea735c: Pull complete  
-c6ff40b6d658: Pull complete  
-a7050fc1f338: Pull complete  
-f0ffb5cf6ba9: Pull complete  
-be232718519c: Pull complete  
-Digest: sha256:a0ee7647e24c8494f1cf6b94f1a3cd127f423268293c25d924fbe18fd82db5a4  
-Status: Downloaded newer image for ubuntu:latest  
- ---> d355ed3537e9  
-Successfully built d355ed3537e9  
+> Sending build context to Docker daemon  1.19 MB
+Step 1/1 : FROM ubuntu:latest
+latest: Pulling from library/ubuntu
+75c416ea735c: Pull complete
+c6ff40b6d658: Pull complete
+a7050fc1f338: Pull complete
+f0ffb5cf6ba9: Pull complete
+be232718519c: Pull complete
+Digest: sha256:a0ee7647e24c8494f1cf6b94f1a3cd127f423268293c25d924fbe18fd82db5a4
+Status: Downloaded newer image for ubuntu:latest
+ ---> d355ed3537e9
+Successfully built d355ed3537e9
 
-Agora podemos adicionar os pacotes necessários para o executar a aplicação:
+Vamos instalar o curl, necessário para instalar o NodeJS:
 
 ```
-RUN apt-get update && \  
-apt-get install -y make openjdk-8-jdk && \  
+RUN apt-get update && \
+apt-get install -y curl && \
 apt-get clean
 ```
 
@@ -103,46 +103,61 @@ Novamente, `docker image build .`
 
 | REPOSITORY | TAG | IMAGE ID | CREATED | SIZE |
 |------------|-----|----------|---------|------|
-| \<none\> | \<none\> | e791248e891e | About a minute ago | 487 MB |
+| \<none\> | \<none\> | e791248e891e | About a minute ago | 142 MB |
 
-Depender de `latest` não é uma boa prática, vamos mudar para 16.04 (versão com suporte):
+Agora podemos instalar o NodeJS:
 
 ```
-FROM ubuntu:16.04
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash
+RUN apt-get update && apt-get install -y nodejs && apt-get clean
+```
+
+Depender de `latest` não é uma boa prática, vamos mudar para 18.04 (versão LTS):
+
+```
+FROM ubuntu:18.04
 ```
 
 ## Dando nome a nossa imagem
 
 Podemos associar uma tag a imagem criada usando a opção `-t`:
 
-`docker image build . -t javakioh`
+`docker image build . -t pokenode`
 
 | REPOSITORY | TAG | IMAGE ID | CREATED | SIZE |
 |------------|-----|----------|---------|------|
-| javakihon | latest | e791248e891e | About a minute ago | 487 MB |
+| pokenode | latest | e791248e891e | About a minute ago | 142 MB |
 
-## Tarefa make para construir imagem
+## Usando o docker-compose para facilitar nossa vida
 
-Para padronizar a execução, podemos adicionar o seguinte bloco no `Makefile`
+Compose é uma ferramenta para descrição e execução de aplicações com múltiples containers. O Compose encapsula alguns comandos básicos do Docker de forma que podemos utilizá-lo de uma maneira declarativa.
+
+Para isso, precisamos de um arquivo `docker-compose.yml` onde vamos descrever nossa aplicação. Nesse ponto, a única coisa que fazemos é construir sua image.
+
+Cada componente da aplicação é definido por um serviço no Compose:
 
 ```
-buildImage:  
-  docker image build . -t javakioh
+version: '3.6'
+services:
+  app:
+    build: .
+    image: pokenode
+
 ```
 
-Agora podemos criar uma versão nova da imagem usando `make buildImage`.
+Agora podemos criar uma versão nova da imagem usando `docker-compose build`, sem a necessidade de explicitar a tag ou contexto.
 
 ## Usando a imagem
 
-Vamos entrar no container pra saber se tudo foi instalado corretamente: `docker container run javakihon /bin/bash`
+Vamos entrar no container pra saber se tudo foi instalado corretamente: `docker container run pokenode /bin/bash`
 
 O `docker container run <imagem> <comando>` o comando em container baseado na imagem. A vida do container é associada diretamente ao processo do comando, assim que encerrado, o container parará.
 
 Para manter a sessão, devemos utilizar as opções `-i` (modo interativo) e `-t` (para alocar um tty) do comando `run`.
 
-Dessa vez, executaremos: `docker container run -ti javakihon /bin/bash`
+Dessa vez, executaremos: `docker container run -ti pokenode /bin/bash`
 
-Outros comandos interessantes: `docker container ls`, `docker start` e `docker stop`.
+Outros comandos interessantes: `docker container ls`, `docker container start` e `docker container stop`.
 
 ## Código fonte
 
@@ -152,7 +167,7 @@ Copiar arquivos do host para a image é feito usando o comando `COPY`:
 COPY . /app
 ```
 
-Devemos recriar a image `make buildImage` e então podemos verificar se o código está por lá `docker container run javakihon ls /app`
+Devemos recriar a image, `docker-compose build`, e então podemos verificar se o código está por lá `docker container run pokenode ls /app`
 
 ## Diretório padrão
 
@@ -162,60 +177,57 @@ Para que todos os comandos do `run` executem a partir do diretório /app, podemo
 WORKDIR /app
 ```
 
+## Instalando dependências
+
+Antes de qualquer coisa precisamos instalar as dependências, para isso, excutamos `npm install` e recriamos a image.
+
+Por padrão, `npm` instala as dependências no diretório `node_modules` na raiz do projeto. Quando copiamos os arquivos, esse diretório também é incluso.
+
+Isso pode acarretar em problemas, dado que o ambiente do host é diferente do container. Podemos indicar ao Docker que ignore o diretório usando o arquivo `.dockerignore`.
+
+```
+node_modules
+```
+
 ## Executando testes a partir do container
 
-Já com o código e as dependências instaladas, podemos executar os testes a partir do container: `docker container run -ti javakihon make test`.
+Já com o código e as dependências instaladas, podemos executar os testes a partir do container: `docker container run -ti pokenode npm test`.
 
-## Opcional: Reusando o gradle
+## Executando testes com a ajuda do Compose
 
-Sempre que executamos os testes ou a aplicação, o gradlew irá baixar a versão correta do gradle. Isso é longe de ideal para o tempo do workshop.
-
-Pensando nisso, criamos uma imagem com o gradle instalado por padrão, [javakihon-gradle](https://hub.docker.com/r/fernandoalves/javakihon-gradle/).
-
-**Importante:** Essa imagem deve ser utilizada somente como parte desse workshop. Não é uma solução definitiva e nem recomendada para uma situação real.
+Podemos simplificar a execução dos testes usando `docker-compose run --rm app npm test`.
 
 ## Quais outros serviços ela precisa?
 
 Em execução, o aplicação precisa do banco de dados. Nesse caso temos 2 opções:
 
-- Instalar e executar postgres dentro do container: Não é uma boa prática. Por que?
-- Usar o container do postgres: irado!
+- Instalar e executar redis dentro do container: Não é uma boa prática. Por que?
+- Usar o container do redis: irado!
 
 ## Network
 
 Por padrão docker cria uma rede docker0 que é compartilhada por todos os containers. Mas não queremos isso.
 
-Uma rede isolada para a nosso ambiente: `docker network create javakihon`
+Uma rede isolada para a nosso ambiente: `docker network create pokenode-network`
 
 ## Associando um container a uma rede
 
-Para o postgres, podemos fazer: `docker container run -d --network=javakihon postgres`
+Para o redis, podemos fazer: `docker container run -d --network=pokenode-network redis`
 
-Vamos executar o nosso container na mesma rede: `docker container run -ti --network=javakihon javakihon /bin/bash`
+Vamos executar o nosso container na mesma rede: `docker container run -ti --network=pokenode-network pokenode /bin/bash`
 
-Para saber se a rede está corretamente configurada, podemos verificar o arquivo `/etc/hosts`:
+Para saber se a rede está corretamente configurada, podemos pingar o outro container `ping 18e2f6857bdb` (precisa instalar o ping).
 
->root@18e2f6857bdb:/# cat /etc/hosts  
-127.0.0.1	localhost  
-::1	localhost ip6-localhost ip6-loopback  
-fe00::0	ip6-localnet  
-ff00::0	ip6-mcastprefix  
-ff02::1	ip6-allnodes  
-ff02::2	ip6-allrouters  
-172.18.0.3	18e2f6857bdb <- container
-
-Podemos pingar o outro container `ping 18e2f6857bdb` (precisa instalar o ping).
-
-Todavia, o nome do containter é efêmero, portando o aquivo mudará a cada nova execução do postgres. Para mitigar esse problema, podemos dar um nome ao container: `docker container run --name=db --network=javakihon postgres`
+Todavia, o nome do containter é efêmero, mudará a cada nova execução do redis. Para mitigar esse problema, podemos dar um nome ao container: `docker container run --name=db --network=pokenode-network pokenode`
 
 `ping db` deve funcionar agora:
 
->root@b1097a4115d1:/# ping db  
-PING db (172.18.0.2) 56(84) bytes of data.  
-64 bytes from db.javakihon (172.18.0.2): icmp_seq=1 ttl=64   time=0.107 ms  
-64 bytes from db.javakihon (172.18.0.2): icmp_seq=2 ttl=64   time=0.106 ms  
-64 bytes from db.javakihon (172.18.0.2): icmp_seq=3 ttl=64   time=0.166 ms  
-64 bytes from db.javakihon (172.18.0.2): icmp_seq=4 ttl=64   time=0.102 ms
+>root@b1097a4115d1:/# ping db
+PING db (172.18.0.2) 56(84) bytes of data.
+64 bytes from db.pokenode-network (172.18.0.2): icmp_seq=1 ttl=64   time=0.107 ms
+64 bytes from db.pokenode-network (172.18.0.2): icmp_seq=2 ttl=64   time=0.106 ms
+64 bytes from db.pokenode-network (172.18.0.2): icmp_seq=3 ttl=64   time=0.166 ms
+64 bytes from db.pokenode-network (172.18.0.2): icmp_seq=4 ttl=64   time=0.102 ms
 
 ## Tornando nossa aplicação configurável
 
@@ -257,7 +269,7 @@ Como acessar do host?
 Devemos indicar, no momemnto de criação da image, que o container deve aceitar conexões em uma determinada porta:
 
 ```
-EXPOSE 8080  
+EXPOSE 8080
 ```
 
 Como o postgres, nosso comando run também deve mapear a porta: `docker container run -e DB_HOST=db --network=javakihon -p 8080:8080 javakihon`
