@@ -222,16 +222,18 @@ Vamos executar o nosso container na mesma rede: `docker container run -ti --netw
 
 Para saber se a rede está corretamente configurada, podemos pingar o outro container `ping 18e2f6857bdb` (precisa instalar o ping).
 
-Todavia, o nome do containter é efêmero, mudará a cada nova execução do redis. Para mitigar esse problema, podemos dar um nome ao container: `docker container run --name=db --network=pokenode-network pokenode`
+Todavia, o nome do containter é efêmero, mudará a cada nova execução do redis. Para mitigar esse problema, podemos dar um nome ao container: `docker container run --name=db --network=pokenode-network redis`
 
 `ping db` deve funcionar agora:
 
+```
 >root@b1097a4115d1:/# ping db
 PING db (172.18.0.2) 56(84) bytes of data.
 64 bytes from db.pokenode-network (172.18.0.2): icmp_seq=1 ttl=64   time=0.107 ms
 64 bytes from db.pokenode-network (172.18.0.2): icmp_seq=2 ttl=64   time=0.106 ms
 64 bytes from db.pokenode-network (172.18.0.2): icmp_seq=3 ttl=64   time=0.166 ms
 64 bytes from db.pokenode-network (172.18.0.2): icmp_seq=4 ttl=64   time=0.102 ms
+```
 
 ## Tornando nossa aplicação configurável
 
