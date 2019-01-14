@@ -49,7 +49,16 @@ function setup_docker {
   install_if_not_present docker
 }
 
+function ensure_docker_is_running {
+  if ! docker info &> /dev/null ; then
+    echo 'It looks Docker is not started.'
+    echo 'Please start the server and run this script again.'
+    exit 1
+  fi
+}
+
 function pull_images {
+  ensure_docker_is_running
   ensure_image_is_present 'ubuntu:18.04'
 }
 
