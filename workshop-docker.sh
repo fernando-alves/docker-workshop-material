@@ -69,8 +69,17 @@ function redis_notice {
   fi
 }
 
+function nodejs_notice {
+  if ! check_presence 'node' ; then
+    echo 'It looks like dont have node installed.'
+    echo 'Please install it before the workshop. It can be done via: brew install node'
+    exit 1
+  fi
+}
+
 setup_docker
 pull_images
 redis_notice
+nodejs_notice
 
 echo 'All set!'
